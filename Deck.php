@@ -1,8 +1,8 @@
 <?php
 
 $suits = array('Spades', 'Hearts', 'Clubs', 'Diamonds');
-$numbers = array('2' => 2, '3' => 3, '4' => 4, '5' => 5, '6' => 6, '7' => 7, '8' => 8, '9' => 9, '10' => 10, 'J' => 10, 'Q' => 10, 'K' => 10, 'A' => array(1, 11));
-
+$numbers = array('2' => 2, '3' => 3, '4' => 4, '5' => 5, '6' => 6, '7' => 7, '8' => 8, '9' => 9, '10' => 10, 'J' => 10, 'Q' => 10, 'K' => 10, 'A' => 11);
+// array(1, 11)
 Class Card {
 	public $suit;
 	public $number;
@@ -21,7 +21,6 @@ Class Deck {
 		unset($this->deck);
 		$this->deck = array();
 		foreach ($suits as $suit) {
-			echo $suit;
 			foreach ($numbers as $number => $numberValue) {
 				$newCard = new Card;
 				$newCard->suit = $suit;
@@ -48,13 +47,36 @@ Class Deck {
 	}
 }
 
+class Player {
+	public $name;
+	public $cards = array();
+	public function getCard($deck) {
+		$sum = 0;
+		$this->cards[] = $deck->dealCard();
+		foreach ($this->cards as $key => $value) {
+			$sum += $value->value;
+		}
+		if($sum > 21) {
+			echo "You, $this->name, have lost! $sum is over!";
+			$this->cards = array();
+		}
+	}
+}
+
+
 $firstDeck = new Deck;
 $firstDeck->shuffle();
 $firstDeck->resetDeck();
-$card1 = $firstDeck->dealCard();
-echo var_dump($card1);
-echo var_dump($firstDeck->deck);
 
+$John = new Player;
+$John->name = "John";
+$John->getCard($firstDeck);
+$John->getCard($firstDeck);
+// $John->getCard($firstDeck);
+
+echo var_dump($John)
+// echo var_dump($card1);
+// echo var_dump($firstDeck->deck);
 
 
 
