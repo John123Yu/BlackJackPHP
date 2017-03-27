@@ -1,4 +1,5 @@
 <?php
+session_start();
 
 $suits = array('Spades', 'Hearts', 'Clubs', 'Diamonds');
 $numbers = array('2' => 2, '3' => 3, '4' => 4, '5' => 5, '6' => 6, '7' => 7, '8' => 8, '9' => 9, '10' => 10, 'J' => 10, 'Q' => 10, 'K' => 10, 'A' => 11);
@@ -63,21 +64,87 @@ class Player {
 	}
 }
 
-
+//----------Initializes Game -----------------------------//
+if(!isset($_SESSION['all'])) {
+	$_SESSION['all'] = array();
+}
 $firstDeck = new Deck;
 $firstDeck->shuffle();
-$firstDeck->resetDeck();
+$house = new Player;
+$house->name = "House";
+$numPlayers = sizeof($_SESSION['all']);
+//-------------------------------------------------------//
 
-$John = new Player;
-$John->name = "John";
-$John->getCard($firstDeck);
-$John->getCard($firstDeck);
-// $John->getCard($firstDeck);
+if(isset($_POST['clearSession'])) {
+	$_SESSION['all'] = array();
+}
 
-echo var_dump($John)
-// echo var_dump($card1);
-// echo var_dump($firstDeck->deck);
+if(isset($_POST['submit'])) {
+	$numPlayers++;
+	${$_POST['name']} = new Player;
+	${$_POST['name']}->name = $_POST['name'];
+	$_SESSION['all'][] = ${$_POST['name']};
+}
 
+if(isset($_POST['startRound'])) {
+	$house->getCard($firstDeck);
+	$house->getCard($firstDeck);
+	foreach ($_SESSION['all'] as $key => $value) {
+		$value->getCard($firstDeck);
+		$value->getCard($firstDeck);
+	}
+}
 
+echo var_dump($_SESSION['all']);
 
 ?>
+<html>
+<head>
+	<title>Black Jack</title>
+</head>
+<body>
+	<header>
+		<form method = "post" action = "Deck.php">
+			<input type = "text" name = "name">
+			<input type = "submit" name = "submit" value = "Add Player">
+		</form>
+		<form method = "post" action = "Deck.php">
+			<input type = "submit" name = "clearSession" value = "Reset Game">
+		</form>
+		<form method = "post" action = "Deck.php">
+			<input type = "submit" name = "startRound" value = "Start Round">
+		</form>
+		<hr>
+	</header>
+	<div class = "main">
+		<div class = "table">
+			<ul>
+				<li>House: </li>
+				<?php 
+				foreach ($_SESSION['all'] as $key => $value) {
+					echo "<li>$value->name</li>";
+				} ?>
+			</ul>
+		</div>
+	</div>
+</body>
+<style type="text/css">
+	.table {
+		background-color: lightgrey;
+		width: 80%;
+		height: 70%;
+		border-radius: 10px;
+		margin-top: 20px;
+		margin-left: 10%;
+	}
+	li {
+		padding-top: 10px;
+		text-align: center;
+		margin: 3%;
+		background-color: white;
+		width: 100px;
+		height: 90px;
+		display: inline-block;
+	}
+</style>
+</html>
