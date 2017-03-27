@@ -2,12 +2,13 @@
 session_start();
 
 $suits = array('Spades', 'Hearts', 'Clubs', 'Diamonds');
-$numbers = array('2' => 2, '3' => 3, '4' => 4, '5' => 5, '6' => 6, '7' => 7, '8' => 8, '9' => 9, '10' => 10, 'J' => 10, 'Q' => 10, 'K' => 10, 'A' => 11);
+$numbers = array('2' => 2, '3' => 3, '4' => 4, '5' => 5, '6' => 6, '7' => 7, '8' => 8, '9' => 9, '10' => 10, 'j' => 10, 'q' => 10, 'k' => 10, '1' => 11);
 // array(1, 11)
 Class Card {
 	public $suit;
 	public $number;
 	public $value;
+	public $img;
 }
 
 Class Deck {
@@ -27,6 +28,7 @@ Class Deck {
 				$newCard->suit = $suit;
 				$newCard->number = $number;
 				$newCard->value = $numberValue;
+				$newCard->img = cardGenerator($suit, $number);
 				$this->deck[] = $newCard;
 			}
 		}
@@ -64,34 +66,43 @@ class Player {
 	}
 }
 
+function cardGenerator($suit, $number) {
+	if($suit == 'Spades') {
+		return 's'.$number.'.png';
+	} elseif ($suit == 'Hearts') {
+		return 'h'.$number.'.png';
+	} elseif ($suit == "Diamonds") {
+		return 'd'.$number.'.png';
+	} else {
+		return 'c'.$number.'.png';
+	}
+}
+
 //----------Initializes Game -----------------------------//
 if(!isset($_SESSION['all'])) {
 	$_SESSION['all'] = array();
+	$_SESSION['firstDeck'] = new Deck;
+	$_SESSION['firstDeck'] ->shuffle();
+	$house = new Player;
+	$house->name = "House";
+	$_SESSION['all'][] = $house;	
 }
-$firstDeck = new Deck;
-$firstDeck->shuffle();
-$house = new Player;
-$house->name = "House";
-$numPlayers = sizeof($_SESSION['all']);
 //-------------------------------------------------------//
 
 if(isset($_POST['clearSession'])) {
-	$_SESSION['all'] = array();
+	session_destroy();
 }
 
 if(isset($_POST['submit'])) {
-	$numPlayers++;
 	${$_POST['name']} = new Player;
 	${$_POST['name']}->name = $_POST['name'];
 	$_SESSION['all'][] = ${$_POST['name']};
 }
 
 if(isset($_POST['startRound'])) {
-	$house->getCard($firstDeck);
-	$house->getCard($firstDeck);
 	foreach ($_SESSION['all'] as $key => $value) {
-		$value->getCard($firstDeck);
-		$value->getCard($firstDeck);
+		$value->getCard($_SESSION['firstDeck']);
+		$value->getCard($_SESSION['firstDeck']);
 	}
 }
 
@@ -119,11 +130,15 @@ echo var_dump($_SESSION['all']);
 	<div class = "main">
 		<div class = "table">
 			<ul>
-				<li>House: </li>
 				<?php 
 				foreach ($_SESSION['all'] as $key => $value) {
-					echo "<li>$value->name</li>";
-				} ?>
+					echo "<li> $value->name ";
+					foreach ($value->cards as $cardKey => $cardValue) {
+						echo "<img src = './cards-png/$cardValue->img'>";
+					}
+					echo "</li>";
+				} 
+				?>
 			</ul>
 		</div>
 	</div>
@@ -141,10 +156,8 @@ echo var_dump($_SESSION['all']);
 		padding-top: 10px;
 		text-align: center;
 		margin: 3%;
-		background-color: white;
-		width: 100px;
-		height: 90px;
 		display: inline-block;
+		vertical-align: top;
 	}
 </style>
 </html>
